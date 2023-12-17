@@ -1,37 +1,49 @@
 const express = require('express');
+const fs = require('fs').promises;
 const app = express();
 const port = 3000;
 
-let emails = {
-    1: "email1@example.com",
-    2: "email2@example.com",
-    3: "email4@example.com"
-};
+let emails = {};
+
+async function loadEmails() {
+    try {
+      const data = await fs.readFile('emails.json', 'utf-8');
+  
+      if (data.trim() === '') {
+        console.error('Error loading emails: File is empty');
+        return;
+      }
+  
+      console.log('Data read from emails.json:', data);
+  
+      emails = JSON.parse(data);
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        if (error.message.includes('Unexpected end of JSON input')) {
+          console.error('Error loading emails: JSON file is incomplete or empty');
+        } else {
+          console.error('Error loading emails: Invalid JSON syntax');
+        }
+      } else {
+        console.error('Error loading emails:', error.message);
+      }
+    }
+  }
+  
 
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Remova a rota '/emails'
-// app.post('/emails', (req, res) => {
-//     const email = req.body.email;
-//     const id = Object.keys(emails).length + 1;
-//     emails[id] = email;
-//     res.json({ id, email });
-// });
+// Rota para obter todos os e-mails
+app.get('/emails', (req, res) => {
+  res.json(emails);
+});
 
-// Remova a rota '/emails/:email'
-// app.delete('/emails/:email', (req, res) => {
-//     const emailToDelete = req.params.email;
-//     const id = Object.keys(emails).find(key => emails[key] === emailToDelete);
-//     if (id) {
-//         delete emails[id];
-//         res.json({ message: 'Email deleted' });
-//     } else {
-//         res.status(404).send('Email not found');
-//     }
-// });
+// Restante do código
 
-app.listen(port, () => {
+loadEmails().then(() => {
+  app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
+  });
 });
