@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar E-mail</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Scripts para incorporar o TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: '#corpo',
+            plugins: 'autoresize',
+            autoresize_bottom_margin: 16,
+            menubar: false,
+            toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+        });
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Formulário de Envio de E-mail</h2>
+        <form action="http://localhost:8000/enviar_email" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="assunto">Assunto:</label>
+                <input type="text" id="assunto" name="assunto" class="form-control" required>
+            </div>
+
+            <div ++class="form-group">
+                <label for="corpo">Corpo:</label>
+                <textarea id="corpo" name="corpo" rows="4" class="form-control" required></textarea>
+            </div>
+
+            <!-- Assinatura de E-mail com Imagem -->
+            <div class="form-group">
+                <label for="assinatura">Assinatura de E-mail (URL da imagem):</label>
+                <input type="url" id="assinatura" name="assinatura" class="form-control">
+            </div>
+
+            <div id="emails-container">
+                <div class="form-group">
+                    <label for="emails">E-mail:</label>
+                    <input type="email" name="emails[]" class="form-control" list="lista-emails" required>
+                    <datalist id="lista-emails"></datalist>
+                    <input type="file" name="anexos[]" accept=".pdf" class="form-control" required>
+                    <button type="button" class="btn btn-danger btn-sm ml-2" onclick="removerEmail(this)">Remover</button>
+                </div>
+            </div>
+
+            <button type="button" onclick="adicionarEmail()" class="btn btn-primary">Adicionar E-mail</button>
+            <br>
+            <br>
+
+            <div class="form-group">
+                <label for="email-salvar">Salvar E-mail:</label>
+                <input type="email" id="email-salvar" class="form-control">
+            </div>
+            <button type="button" onclick="salvarEmail()" class="btn btn-success">Salvar E-mail</button>
+
+            <br>
+
+            <input type="submit" value="Enviar E-mail" class="btn btn-success">
+        </form>
+    </div>
+    <script>
+        var listaEmails = [];
+
+        function adicionarEmail() {
+            var container = document.getElementById("emails-container");
+            var novoEmail = document.createElement("div");
+            novoEmail.className = "form-group";
+            var numeroCampos = container.children.length / 2 + 1;
+            novoEmail.innerHTML = '<label for="emails">E-mail:</label>' +
+                                  '<input type="email" name="emails[]" class="form-control" list="lista-emails" required>' +
+                                  '<datalist id="lista-emails"></datalist>' +
+                                  '<input type="file" name="anexos[]" accept=".pdf" class="form-control" required>' +
+                                  '<button type="button" class="btn btn-danger btn-sm ml-2" onclick="removerEmail(this)">Remover</button>';
+            container.appendChild(novoEmail);
+            var novoEmailValue = novoEmail.querySelector('[name="emails[]"]').value;
+            if (novoEmailValue.trim() !== "") {
+                listaEmails.push(novoEmailValue);
+                atualizarListaEmails();
+            }
+        }
+
+        function removerEmail(botaoRemover) {
+            var container = document.getElementById("emails-container");
+            var campoEmail = botaoRemover.parentNode;
+            container.removeChild(campoEmail);
+            var emailRemovido = campoEmail.querySelector('[name="emails[]"]').value;
+            listaEmails = listaEmails.filter(function(email) {
+                return email !== emailRemovido;
+            });
+            atualizarListaEmails();
+        }
+
+        function salvarEmail() {
+            var email = document.getElementById("email-salvar").value;
+            if (email.trim() !== "") {
+                listaEmails.push(email);
+                atualizarListaEmails();
+                document.getElementById("email-salvar").value = "";
+            }
+        }
+
+        function atualizarListaEmails() {
+            var listaContainer = document.getElementById("lista-emails");
+            listaContainer.innerHTML = "";
+            listaEmails.forEach(function(email) {
+                var option = document.createElement("option");
+                option.value = email;
+                listaContainer.appendChild(option);
+            });
+        }
+    </script>
+</body>
+</html>
