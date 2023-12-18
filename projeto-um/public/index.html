@@ -116,5 +116,33 @@
             });
         }
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Adicione os e-mails ao carregar a página
+            carregarListaEmails();
+    
+            // Função para carregar a lista de e-mails nos campos
+            function carregarListaEmails() {
+                var listaContainer = document.getElementById("lista-emails");
+                listaContainer.innerHTML = "";
+    
+                // Obtenha a lista de e-mails do servidor ou de onde você preferir
+                fetch('/emails') // Assumindo que a rota '/emails' retorna a lista de e-mails
+                    .then(response => response.json())
+                    .then(data => {
+                        // Adicione os e-mails ao campo de lista
+                        Object.values(data).forEach(function (email) {
+                            var option = document.createElement("option");
+                            option.value = email;
+                            listaContainer.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error loading emails:', error));
+            }
+    
+            // Restante do seu código existente...
+            // Certifique-se de que a função carregarListaEmails é chamada conforme necessário.
+        });
+    </script>
 </body>
 </html>
