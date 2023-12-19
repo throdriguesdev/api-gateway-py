@@ -66,6 +66,27 @@
         </form>
     </div>
     <script>
+        function loadEmails() {
+            fetch('/emails')
+                .then(response => response.json())
+                .then(emails => {
+                    const emailContainer = document.getElementById('emails-container');
+                    emails.forEach(email => {
+                        const emailInput = document.createElement('input');
+                        emailInput.type = 'email';
+                        emailInput.name = 'emails[]';
+                        emailInput.classList.add('form-control');
+                        emailInput.value = email;
+                        emailContainer.appendChild(emailInput);
+                    });
+                })
+                .catch(error => console.error('Error loading emails:', error));
+        }
+    
+        window.onload = loadEmails;
+    </script>
+    <script>
+
         var listaEmails = [];
 
         function adicionarEmail() {
@@ -118,31 +139,45 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Adicione os e-mails ao carregar a página
+            // Carregar a lista de e-mails ao carregar a página
             carregarListaEmails();
-    
-            // Função para carregar a lista de e-mails nos campos
-            function carregarListaEmails() {
-                var listaContainer = document.getElementById("lista-emails");
-                listaContainer.innerHTML = "";
-    
-                // Obtenha a lista de e-mails do servidor ou de onde você preferir
-                fetch('/emails') // Assumindo que a rota '/emails' retorna a lista de e-mails
-                    .then(response => response.json())
-                    .then(data => {
-                        // Adicione os e-mails ao campo de lista
-                        Object.values(data).forEach(function (email) {
-                            var option = document.createElement("option");
-                            option.value = email;
-                            listaContainer.appendChild(option);
-                        });
-                    })
-                    .catch(error => console.error('Error loading emails:', error));
-            }
     
             // Restante do seu código existente...
             // Certifique-se de que a função carregarListaEmails é chamada conforme necessário.
         });
+    
+        // Função para carregar a lista de e-mails nos campos
+        function carregarListaEmails() {
+            var listaContainer = document.getElementById("lista-emails");
+            var emailsContainer = document.getElementById("emails-container");
+    
+            // Obtenha a lista de e-mails do servidor ou de onde você preferir
+            fetch('/emails') // Assumindo que a rota '/emails' retorna a lista de e-mails
+                .then(response => response.json())
+                .then(data => {
+                    // Adicione os e-mails ao campo de lista e crie os campos de e-mail
+                    Object.values(data).forEach(function (email) {
+                        var option = document.createElement("option");
+                        option.value = email;
+                        listaContainer.appendChild(option);
+    
+                        // Crie os campos de e-mail no formulário
+                        var novoEmail = document.createElement("div");
+                        novoEmail.className = "form-group";
+                        novoEmail.innerHTML = '<label for="emails">E-mail:</label>' +
+                                              '<input type="email" name="emails[]" class="form-control" list="lista-emails" value="' + email + '" required>' +
+                                              '<datalist id="lista-emails"></datalist>' +
+                                              '<input type="file" name="anexos[]" accept=".pdf" class="form-control" required>' +
+                                              '<button type="button" class="btn btn-danger btn-sm ml-2" onclick="removerEmail(this)">Remover</button>';
+                        emailsContainer.appendChild(novoEmail);
+                    });
+                })
+                .catch(error => console.error('Error loading emails:', error));
+        }
+    
+            // Restante do seu código existente...
+            // Certifique-se de que a função carregarListaEmails é chamada conforme necessário.
+      
     </script>
 </body>
 </html>
